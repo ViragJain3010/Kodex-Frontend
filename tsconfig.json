@@ -34,7 +34,8 @@
     "src/app/page.js",
     "src/components/ui/sheet.js",
     "tailwind.config.ts",
-    "src/components/Header/KodexLogo.js"
-, "src/app/Loading.js"  ],
+    "src/components/Header/KodexLogo.js",
+    "src/components/Loader/LoadingSpinner.js"
+  ],
   "exclude": ["node_modules"]
 }

@@ -1,13 +1,18 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useEditor } from "@/context/EditorContext";
+import { useEffect } from "react";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
 });
 
-export default function Editor() {
+export default function Editor({ onLoad }) {
   const { language, code, setCode, isLoadingConfig } = useEditor();
+
+  useEffect(() => {
+    onLoad()
+  }, [onLoad])
 
   if (isLoadingConfig) {
     return (
@@ -30,6 +35,7 @@ export default function Editor() {
           value={code}
           theme="vs-dark"
           onChange={setCode}
+          onMount={onLoad}
           options={{
             minimap: { enabled: false },
             fontSize: 14,
@@ -44,3 +50,4 @@ export default function Editor() {
     </div>
   );
 }
+

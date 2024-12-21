@@ -5,7 +5,7 @@ export default function Footer() {
         <p className="text-sm">
           Built by{' '}
           <a href="#" target="_blank" rel="noreferrer" className="font-medium text-blue-500 dark:text-blue-400 hover:underline">
-            CodeCraft
+            Virag Jain
           </a>. The source code is available on{' '}
           <a href="#" target="_blank" rel="noreferrer" className="font-medium text-blue-500 dark:text-blue-400 hover:underline">
             GitHub

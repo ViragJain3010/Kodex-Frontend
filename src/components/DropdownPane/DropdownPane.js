@@ -70,7 +70,7 @@ export default function DropdownPane() {
       <Select.Root value={language} onValueChange={setLanguage}>
         <Select.Trigger
           className="inline-flex items-center justify-center rounded-md px-3 h-10 gap-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-all"
-          disabled={isLoadingConfig}
+          disabled={isLoadingConfig || isRunning}
         >
           <Select.Value placeholder="Select a language" />
           <Select.Icon className="text-gray-600 dark:text-gray-300">
@@ -105,7 +105,7 @@ export default function DropdownPane() {
           disabled={isRunning || isLoadingConfig}
           className={`px-4 py-2 text-sm font-medium text-white ${
             isRunning || isLoadingConfig
-              ? "bg-green-400 cursor-not-allowed"
+              ? "bg-green-600 cursor-not-allowed"
               : "bg-green-500 hover:bg-green-600"
           } rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
         >

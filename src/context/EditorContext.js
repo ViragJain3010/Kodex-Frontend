@@ -20,39 +20,43 @@ export function EditorProvider({ children }) {
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
   // Fetch language config and update code
-  const fetchLanguageConfig = useCallback(async (lang) => {
-    // If we already have the config, use it
-    if (languageConfigs[lang]) {
-      setCode(languageConfigs[lang].safeConfig.defaultBoilerplate);
-      return;
-    }
+  const fetchLanguageConfig = useCallback(
+    async (lang) => {
+      // If we already have the config, use it
+      if (languageConfigs[lang]) {
+        setCode(languageConfigs[lang].safeConfig.defaultBoilerplate);
+        return;
+      }
 
-    setIsLoadingConfig(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/languages/${lang}`);
-      if (!response.ok)
-        throw new Error(`Failed to fetch ${lang} configuration`);
+      setIsLoadingConfig(true);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/languages/${lang}`
+        );
+        if (!response.ok)
+          throw new Error(`Failed to fetch ${lang} configuration`);
 
-      const config = await response.json();
-      if (!config.success)
-        throw new Error(`API error for ${lang} configuration`);
+        const config = await response.json();
+        if (!config.success)
+          throw new Error(`API error for ${lang} configuration`);
 
-      // Update cache with new config
-      setLanguageConfigs((prev) => ({
-        ...prev,
-        [lang]: config,
-      }));
+        // Update cache with new config
+        setLanguageConfigs((prev) => ({
+          ...prev,
+          [lang]: config,
+        }));
 
-      // Set the boilerplate code
-      setCode(config.safeConfig.defaultBoilerplate);
-    } catch (error) {
-      console.error("Error fetching language config:", error);
-      setOutput(`Error loading ${lang} configuration: ${error.message}`);
-    } finally {
-      setIsLoadingConfig(false);
-    }
-  }, []);
+        // Set the boilerplate code
+        setCode(config.safeConfig.defaultBoilerplate);
+      } catch (error) {
+        console.error("Error fetching language config:", error);
+        setOutput(`Error loading ${lang} configuration: ${error.message}`);
+      } finally {
+        setIsLoadingConfig(false);
+      }
+    },
+    [language]
+  );
 
   // Effect to fetch config when language changes
   useEffect(() => {
@@ -62,7 +66,8 @@ export function EditorProvider({ children }) {
   const handleRun = useCallback(async () => {
     setIsRunning(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/execute`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/execute`,
         {
           method: "POST",
           headers: {
@@ -77,7 +82,6 @@ export function EditorProvider({ children }) {
       );
 
       const data = await response.json();
-      console.log(data);
       if (!data.success) {
         throw new Error(data.error || "Execution failed");
       }
@@ -91,10 +95,9 @@ export function EditorProvider({ children }) {
   }, [language, code, input]);
 
   const handleReset = useCallback(() => {
-    console.log(languageConfigs[language]);
     // Use cached config to reset code
     if (languageConfigs[language]) {
-      setCode(languageConfigs[language].safeConfig.boilerplateCode);
+      setCode(languageConfigs[language].safeConfig.defaultBoilerplate);
     }
     setInput("");
     setOutput("");

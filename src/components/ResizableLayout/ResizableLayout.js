@@ -1,58 +1,75 @@
-'use client'
+"use client";
 
-import { useState, useCallback } from 'react'
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import dynamic from 'next/dynamic'
-import InputArea from '@/components/Input/Input'
-import OutputArea from '@/components/Output/Output'
-import DropdownPane from '@/components/DropdownPane/DropdownPane'
-import LoadingSpinner from '../../app/Loading'
+import { useState, useCallback, useEffect } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import dynamic from "next/dynamic";
+import InputArea from "@/components/Input/Input";
+import OutputArea from "@/components/Output/Output";
+import LoadingSpinner from "../Loader/LoadingSpinner";
 
-const Editor = dynamic(() => import('@/components/Editor/Editor'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false
-})
+const Editor = dynamic(() => import("@/components/Editor/Editor"), {
+  // loading: () => <LoadingSpinner />,
+  ssr: false,
+});
 
 export default function ResizableLayout() {
-  const [leftWidth, setLeftWidth] = useState(50)
-  const [upperRightHeight, setUpperRightHeight] = useState(50)
+  const [leftWidth, setLeftWidth] = useState(50);
+  const [upperRightHeight, setUpperRightHeight] = useState(50);
+  const [isEditorLoading, setIsEditorLoading] = useState(true);
 
   const handleLeftResize = useCallback((sizes) => {
-    setLeftWidth(sizes[0])
-  }, [])
+    setLeftWidth(sizes[0]);
+  }, []);
 
   const handleUpperRightResize = useCallback((sizes) => {
-    setUpperRightHeight(sizes[0])
-  }, [])
+    setUpperRightHeight(sizes[0]);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsEditorLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
-      <DropdownPane />
       <div className="hidden md:block h-full rounded-2xl p-1">
         <PanelGroup direction="horizontal" onLayout={handleLeftResize}>
-          <Panel defaultSize={leftWidth} minSize={20} className='rounded-2xl'>
+          <Panel defaultSize={leftWidth} minSize={20} className="rounded-2xl">
             <div className="h-full p-4 bg-background text-foreground overflow-auto">
-              {/* <Suspense fallback={<LoadingSpinner />}> */}
-                <Editor />
-              {/* </Suspense> */}
+              {isEditorLoading ? (
+                <LoadingSpinner />
+              ) : (
+                <Editor onLoad={() => setIsEditorLoading(false)} />
+              )}
             </div>
           </Panel>
-          <PanelResizeHandle className="w-2 dark:bg-muted dark:hover:bg-muted-foreground bg-gray-200 hover:bg-gray-400 transition-colors" />
-          <Panel defaultSize={100-leftWidth} minSize={20}>
+          <PanelResizeHandle className="w-2 dark:bg-muted dark:hover:bg-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors flex items-center justify-center rounded-xl group">
+            <div className="w-1 h-16 bg-gray-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-green-500 transition-colors" />
+          </PanelResizeHandle>
+          <Panel defaultSize={100 - leftWidth} minSize={20}>
             <PanelGroup direction="vertical" onLayout={handleUpperRightResize}>
-              <Panel defaultSize={upperRightHeight} minSize={20} className='rounded-2xl'>
+              <Panel
+                defaultSize={upperRightHeight}
+                minSize={20}
+                className="rounded-2xl"
+              >
                 <div className="h-full p-4 bg-background text-foreground overflow-auto">
-                  {/* <Suspense fallback={<LoadingSpinner />}> */}
-                    <InputArea />
-                  {/* </Suspense> */}
+                  <InputArea />
                 </div>
               </Panel>
-              <PanelResizeHandle className="h-2 dark:bg-muted dark:hover:bg-muted-foreground bg-gray-200 hover:bg-gray-400 transition-colors" />
-              <Panel defaultSize={100-upperRightHeight} minSize={20} className='rounded-2xl'>
+              <PanelResizeHandle className="h-2 dark:bg-muted dark:hover:bg-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors flex align-middle rounded-xl items-center justify-center group" >
+            <div className="w-16 h-1 bg-gray-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-green-500 transition-colors" />
+              </PanelResizeHandle>
+              <Panel
+                defaultSize={100 - upperRightHeight}
+                minSize={20}
+                className="rounded-2xl"
+              >
                 <div className="h-full p-4 bg-background text-foreground overflow-auto">
-                  {/* <Suspense fallback={<LoadingSpinner />}> */}
-                    <OutputArea />
-                  {/* </Suspense> */}
+                  <OutputArea />
                 </div>
               </Panel>
             </PanelGroup>
@@ -64,22 +81,20 @@ export default function ResizableLayout() {
       <div className="md:hidden h-full">
         <div className="flex flex-col gap-4 p-1">
           <div className="h-[300px] bg-background text-foreground overflow-auto rounded-lg border p-2">
-            {/* <Suspense fallback={<LoadingSpinner />}> */}
-              <Editor />
-            {/* </Suspense> */}
+            {isEditorLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <Editor onLoad={() => setIsEditorLoading(false)} />
+            )}
           </div>
           <div className="h-[200px] bg-background text-foreground overflow-auto rounded-lg border p-2">
-            {/* <Suspense fallback={<LoadingSpinner />}> */}
-              <InputArea />
-            {/* </Suspense> */}
+            <InputArea />
           </div>
           <div className="h-[200px] bg-background text-foreground overflow-auto rounded-lg border p-2">
-            {/* <Suspense fallback={<LoadingSpinner />}> */}
-              <OutputArea />
-            {/* </Suspense> */}
+            <OutputArea />
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
