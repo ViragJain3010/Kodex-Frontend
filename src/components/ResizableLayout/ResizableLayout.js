@@ -46,8 +46,8 @@ export default function ResizableLayout() {
               )}
             </div>
           </Panel>
-          <PanelResizeHandle className="w-2 dark:bg-muted dark:hover:bg-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors flex items-center justify-center rounded-xl group">
-            <div className="w-1 h-16 bg-gray-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-green-500 transition-colors" />
+          <PanelResizeHandle className="w-2 dark:bg-muted  bg-gray-200 flex items-center justify-center rounded-xl group">
+            <div className="w-1 h-16 bg-gray-600 rounded-2xl group-hover:bg-blue-600 group-active:bg-blue-600 dark:group-hover:bg-green-500 dark:group-active:bg-green-500 group-hover:h-full group-active:h-full transition-all duration-300 ease-in-out" />
           </PanelResizeHandle>
           <Panel defaultSize={100 - leftWidth} minSize={20}>
             <PanelGroup direction="vertical" onLayout={handleUpperRightResize}>
@@ -60,9 +60,12 @@ export default function ResizableLayout() {
                   <InputArea />
                 </div>
               </Panel>
-              <PanelResizeHandle className="h-2 dark:bg-muted dark:hover:bg-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors flex align-middle rounded-xl items-center justify-center group" >
-            <div className="w-16 h-1 bg-gray-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-green-500 transition-colors" />
-              </PanelResizeHandle>
+              {/* <PanelResizeHandle className="h-2 dark:bg-muted dark:hover:bg-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors flex align-middle rounded-xl items-center justify-center group">
+                <div className="w-16 h-1 bg-gray-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-green-500 transition-colors" />
+              </PanelResizeHandle> */}
+              <PanelResizeHandle className="h-2 dark:bg-muted  bg-gray-200 flex items-center justify-center rounded-xl group">
+            <div className="w-16 h-1 bg-gray-600 rounded-2xl group-hover:bg-blue-600 group-active:bg-blue-600 dark:group-hover:bg-green-500 dark:group-active:bg-green-500 group-hover:w-full group-active:w-full transition-all duration-300 ease-in-out" />
+          </PanelResizeHandle>
               <Panel
                 defaultSize={100 - upperRightHeight}
                 minSize={20}

@@ -1,14 +1,21 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useEditor } from "@/context/EditorContext";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
 });
 
 export default function Editor({ onLoad }) {
-  const { language, code, setCode, isLoadingConfig } = useEditor();
+  const { language, code, setCode, isLoadingConfig, createSlug, slug } = useEditor();
+
+  const handleChange = useCallback((newValue) => {
+    setCode(newValue);
+    if (!slug) {
+      createSlug();
+    }
+  }, [setCode, createSlug, slug]);
 
   useEffect(() => {
     onLoad()
@@ -34,7 +41,7 @@ export default function Editor({ onLoad }) {
           language={language}
           value={code}
           theme="vs-dark"
-          onChange={setCode}
+          onChange={handleChange}
           onMount={onLoad}
           options={{
             minimap: { enabled: false },

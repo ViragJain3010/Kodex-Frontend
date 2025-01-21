@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
 } from "react";
+import { generateSlug } from "random-word-slugs";
 
 const EditorContext = createContext();
 
@@ -15,9 +16,25 @@ export function EditorProvider({ children }) {
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [language, setLanguage] = useState("javascript");
+  const [isLanguageChangedByUser, setIsLanguageChangedByUser] = useState(true);
+  const [slug, setSlug] = useState("");
   // Cache for language configurations
   const [languageConfigs, setLanguageConfigs] = useState({});
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+  const slugFormat = {
+    format: "kebab",
+    partsOfSpeech: ["adjective", "noun"],
+    categories: {
+      adjective: ["color", "appearance", "shapes", "taste"],
+      noun: ["animals", "food", "media"],
+    },
+  };
+
+  const apiBaseUrl =
+    process.env.NODE_ENV === "production"
+      ? process.env.NEXT_PUBLIC_API_URL
+      : "http://localhost:3001/api";
 
   // Fetch language config and update code
   const fetchLanguageConfig = useCallback(
@@ -30,9 +47,7 @@ export function EditorProvider({ children }) {
 
       setIsLoadingConfig(true);
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/languages/${lang}`
-        );
+        const response = await fetch(`${apiBaseUrl}/languages/${lang}`);
         if (!response.ok)
           throw new Error(`Failed to fetch ${lang} configuration`);
 
@@ -60,26 +75,57 @@ export function EditorProvider({ children }) {
 
   // Effect to fetch config when language changes
   useEffect(() => {
-    fetchLanguageConfig(language);
+    if (isLanguageChangedByUser) {
+      fetchLanguageConfig(language);
+    }
   }, [language, fetchLanguageConfig]);
 
+  const createSlug = useCallback(async () => {
+    let temp;
+    try {
+      if (!slug) {
+        {
+          let attempts = 0;
+          const maxAttempts = 10;
+
+          while (attempts < maxAttempts) {
+            temp = generateSlug(2, slugFormat);
+            const checkResponse = await fetch(`${apiBaseUrl}/check/${temp}`);
+            if (checkResponse.ok) {
+              setSlug(temp);
+              break;
+            }
+            attempts++;
+          }
+
+          if (!temp) {
+            throw new Error(
+              "Failed to generate a valid slug after multiple attempts."
+            );
+          }
+        }
+      }
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+    }
+  });
+
+  // Run code
   const handleRun = useCallback(async () => {
     setIsRunning(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/execute`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            language,
-            code,
-            input,
-          }),
-        }
-      );
+      const response = await fetch(`${apiBaseUrl}/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          slug,
+          language,
+          code,
+          input,
+        }),
+      });
 
       const data = await response.json();
       if (!data.success) {
@@ -92,7 +138,28 @@ export function EditorProvider({ children }) {
     } finally {
       setIsRunning(false);
     }
-  }, [language, code, input]);
+  }, [language, code, input, slugFormat]);
+
+  const fetchSnippet = useCallback(async (slugParam) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/${slugParam}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch snippet");
+      }
+      const data = await response.json();
+      if (!data) {
+        window.history.pushState(null, "", `/`);
+        handleReset;
+      } else {
+        setCode(data.code);
+        setInput(data.input);
+        setOutput(data.output);
+        setLanguage(data.language);
+      }
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+    }
+  });
 
   const handleReset = useCallback(() => {
     // Use cached config to reset code
@@ -116,6 +183,10 @@ export function EditorProvider({ children }) {
     isLoadingConfig,
     handleRun,
     handleReset,
+    slug,
+    fetchSnippet,
+    setIsLanguageChangedByUser,
+    createSlug,
   };
 
   return (

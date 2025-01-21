@@ -2,6 +2,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header/Header";
+import { EditorProvider } from "@/context/EditorContext";
 
 import { ThemeProvider } from "@/context/ThemeProvider";
 
@@ -19,7 +20,9 @@ export default async function RootLayout({ children }) {
       <body className={`${inter.className} flex flex-col h-screen scrollbar-custom`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Header />
+          <EditorProvider>
           {children}
+          </EditorProvider>
         </ThemeProvider>
       </body>
     </html>

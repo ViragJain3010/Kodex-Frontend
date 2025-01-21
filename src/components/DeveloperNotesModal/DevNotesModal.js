@@ -102,7 +102,7 @@ export default function DevNotesModal({ isPageLoaded }) {
                 }
                 className="w-full flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-sm sm:text-base"
               >
-                Show me the solution <ExternalLink className="ml-2 h-4 w-4" />
+                Show me the workaround <ExternalLink className=" h-4 w-4" />
               </Button>
             </>
           )}

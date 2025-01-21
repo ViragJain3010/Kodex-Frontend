@@ -14,35 +14,49 @@ export default function DropdownPane() {
     handleReset,
     isRunning,
     isLoadingConfig,
+    slug,
+    setIsLanguageChangedByUser,
   } = useEditor();
   const [languages, setLanguages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const apiBaseUrl =
+  process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL // Your production API URL
+    : 'http://localhost:3001/api'; // Local API URL during development
+
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/languages`);
+        const response = await fetch(`${apiBaseUrl}/languages`);
         if (!response.ok) throw new Error("Failed to fetch languages");
         const data = await response.json();
         if (!data.success)
           throw new Error("API returned unsuccessful response");
-
-        const transformedLanguages = data.languages.map((lang) => ({
-          value: lang.key,
-          label: lang.name,
-        }));
-
-        setLanguages(transformedLanguages);
-        setIsLoading(false);
+        setLanguages(data.languages);
       } catch (err) {
         setError(err.message);
-        setIsLoading(false);
+      }
+      finally{
+        setIsLoading(false)
       }
     };
 
     fetchLanguages();
   }, []);
+
+  useEffect(() => {
+    if (slug) {
+      // Update the browser's URL to '/{slug}' without reloading the page
+      window.history.pushState(null, "", `/${slug}`);
+    }
+  }, [slug]);  
+
+  const handleLanguageChange = (newLanguage) => {
+    setIsLanguageChangedByUser(true)
+    setLanguage(newLanguage)
+  }
 
   if (isLoading || error) {
     return (
@@ -67,7 +81,7 @@ export default function DropdownPane() {
 
   return (
     <div className="flex justify-center items-center bg-gray-200 dark:bg-gray-800 space-x-4 p-2">
-      <Select.Root value={language} onValueChange={setLanguage}>
+      <Select.Root value={language} onValueChange={handleLanguageChange}>
         <Select.Trigger
           className="inline-flex items-center justify-center rounded-md px-3 h-10 gap-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 transition-all"
           disabled={isLoadingConfig || isRunning}
