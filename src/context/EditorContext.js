@@ -14,6 +14,8 @@ export function EditorProvider({ children }) {
   const [code, setCode] = useState("");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [isOutputSuccess, setIsOutputSuccess] = useState(true)
+  const [executionTime, setExecutionTime] = useState(0)
   const [isRunning, setIsRunning] = useState(false);
   const [language, setLanguage] = useState("javascript");
   const [isLanguageChangedByUser, setIsLanguageChangedByUser] = useState(true);
@@ -129,10 +131,14 @@ export function EditorProvider({ children }) {
 
       const data = await response.json();
       if (!data.success) {
-        throw new Error(data.error || "Execution failed");
+        setIsOutputSuccess(false)
+        setOutput(data.error)
+        setExecutionTime(0)
+      }else{
+        setIsOutputSuccess(true)
+        setOutput(data.output);
+        setExecutionTime(data.executionTime)
       }
-
-      setOutput(data.output);
     } catch (error) {
       setOutput(`Error: ${error.message}`);
     } finally {
@@ -171,22 +177,24 @@ export function EditorProvider({ children }) {
   }, [language, languageConfigs]);
 
   const value = {
-    code,
+    code, // user code
     setCode,
-    input,
+    input, // user input
     setInput,
-    output,
+    output, // output from code execution
     setOutput,
-    language,
+    language, // selected language
     setLanguage,
-    isRunning,
-    isLoadingConfig,
-    handleRun,
-    handleReset,
-    slug,
-    fetchSnippet,
-    setIsLanguageChangedByUser,
-    createSlug,
+    isRunning, // is code running
+    isLoadingConfig, // is language config loading
+    handleRun, // function to run code
+    handleReset, // function to reset code, input, output
+    slug, // unique slug for the snippet
+    fetchSnippet, // function to fetch snippet from server
+    setIsLanguageChangedByUser, // function to check if language is changed by user (for [slug]/page.js else it will fetch the language config of the language in the snippet and override the code from the snippet with the default boilerplate code) => This results in the editor always ending up with the default boilerplate code of the language in the snippet instead of the code fetched from the snippet.
+    createSlug, // function to generate a unique slug
+    isOutputSuccess, // is the output successful
+    executionTime, // execution time of the code
   };
 
   return (
